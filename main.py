@@ -28,6 +28,119 @@ def render(board):
         print('\n')
     print(Colors.RESET)
 
+def update_cell(neighbors, r, c, board):
+    if board[r][c] == 1:
+        if neighbors.count(1) <= 1:
+            return 0
+        elif 2 <= neighbors.count(1) <= 3:
+            return 1
+        elif neighbors.count(1) > 3:
+            return 0
+    else:
+        if neighbors.count(1) == 3:
+            return 1
+        return 0
+
+
+def next_edges(board):
+    new_edges = null_state(len(board), len(board[0]))
+    for c in range(1, len(board[0])-1):
+        r = 0
+        neighbors = [board[r][c - 1], board[r][c + 1], board[r+1][c - 1], board[r+1][c], board[r+1][c + 1]]
+        new_edges[r][c] = update_cell(neighbors, r, c, board)
+
+    for c in range(1, len(board[0])-1):
+        r = len(board)-1
+        neighbors = [board[r - 1][c - 1], board[r - 1][c], board[r - 1][c + 1], board[r][c - 1], board[r][c + 1]]
+        new_edges[r][c] = update_cell(neighbors, r, c, board)
+
+    for r in range(1, len(board)-1):
+        c = 0
+        neighbors = [board[r - 1][c], board[r - 1][c + 1], board[r][c + 1], board[r + 1][c], board[r + 1][c + 1]]
+        new_edges[r][c] = update_cell(neighbors, r, c, board)
+
+    for r in range(1, len(board)-1):
+        c = len(board[0])-1
+        neighbors = [board[r - 1][c - 1], board[r - 1][c], board[r][c - 1], board[r + 1][c - 1], board[r + 1][c]]
+        new_edges[r][c] = update_cell(neighbors, r, c, board)
+
+    neighbors = [board[0][1], board[1][0], board[1][1]]
+    new_edges[0][0] = update_cell(neighbors, 0, 0, board)
+
+    neighbors = [board[0][len(board[0])-2], board[1][len(board[0])-2], board[1][len(board[0])-1]]
+    new_edges[0][len(board[0])-1] = update_cell(neighbors, 0, len(board[0])-1, board)
+
+    neighbors = [board[len(board)-1][1], board[len(board)-2][0], board[len(board)-2][1]]
+    new_edges[len(board)-1][0] = update_cell(neighbors, len(board)-1, 0, board)
+
+    neighbors = [board[len(board)-1][len(board[0])-2], board[len(board)-2][len(board[0])-1], board[len(board)-2][len(board[0])-2]]
+    new_edges[len(board)-1][len(board[0])-1] = update_cell(neighbors, len(board)-1, len(board[0])-1, board)
+
+    return new_edges
+
+
+def next_state(board):
+    new_board = next_edges(board)
+    neighbors = []
+    for r in range(1, len(board)-1):
+        for c in range(1, len(board[r])-1):
+            neighbors = [board[r-1][c-1], board[r-1][c], board[r-1][c+1], board[r][c-1], board[r][c+1], board[r+1][c-1], board[r+1][c], board[r+1][c+1]]
+            if board[r][c]:
+                if neighbors.count(1) <= 1:
+                    new_board[r][c] = 0
+                elif 2 <= neighbors.count(1) <= 3:
+                    new_board[r][c] = 1
+                elif neighbors.count(1) > 3:
+                    new_board[r][c] = 0
+            else:
+                if neighbors.count(1) > 3:
+                    new_board[r][c] = 1
+
+    return new_board
 
 if __name__ == '__main__':
-    render(random_state(30, 20))
+    # TEST 1: dead cells with no live neighbors
+    # should stay dead.
+    init_state1 = [
+        [0,0,0],
+        [0,0,0],
+        [0,0,0]
+    ]
+    expected_next_state1 = [
+        [0,0,0],
+        [0,0,0],
+        [0,0,0]
+    ]
+    actual_next_state1 = next_state(init_state1)
+
+    if expected_next_state1 == actual_next_state1:
+        print("PASSED 1")
+    else:
+        print("FAILED 1!")
+        print("Expected:")
+        print(expected_next_state1)
+        print("Actual:")
+        print(actual_next_state1)
+
+    # TEST 2: dead cells with exactly 3 neighbors
+    # should come alive.
+    init_state2 = [
+        [0,0,1],
+        [0,1,1],
+        [0,0,0]
+    ]
+    expected_next_state2 = [
+        [0,1,1],
+        [0,1,1],
+        [0,0,0]
+    ]
+    actual_next_state2 = next_state(init_state2)
+
+    if expected_next_state2 == actual_next_state2:
+        print("PASSED 2")
+    else:
+        print("FAILED 2!")
+        print("Expected:")
+        print(expected_next_state2)
+        print("Actual:")
+        print(actual_next_state2)
