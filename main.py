@@ -1,9 +1,25 @@
 import random
+import sys
+
 import pygame
 import time
 
 def null_state(width, height):
     return [[0 for x in range(width)] for y in range(height)]
+
+def board_from_file(filename):
+    board = []
+    f = open(filename)
+    row = []
+    for c in f:
+        for i in c:
+            if i != '\n':
+                row.append(int(i))
+        board.append(row)
+        row = []
+    return board
+
+
 
 def random_state(width, height):
     board = null_state(width, height)
@@ -28,9 +44,9 @@ def render(board):
                 pygame.draw.rect(b, (255, 255 , 255), rect)
             else:
                 pygame.draw.rect(b, (0, 0, 0), rect)
-            y += 100
-        x += 100
-        y = 0
+            x += 100
+        y += 100
+        x = 0
 
     pygame.display.update()
 
@@ -62,7 +78,7 @@ def update_cell(neighbors, r, c, board):
 
 
 def next_edges(board):
-    new_edges = null_state(len(board), len(board[0]))
+    new_edges = board
     for c in range(1, len(board[0])-1):
         r = 0
         neighbors = [board[r][c - 1], board[r][c + 1], board[r+1][c - 1], board[r+1][c], board[r+1][c + 1]]
@@ -104,22 +120,21 @@ def next_state(board):
     for r in range(1, len(board)-1):
         for c in range(1, len(board[r])-1):
             neighbors = [board[r-1][c-1], board[r-1][c], board[r-1][c+1], board[r][c-1], board[r][c+1], board[r+1][c-1], board[r+1][c], board[r+1][c+1]]
-            if board[r][c]:
-                if neighbors.count(1) <= 1:
-                    new_board[r][c] = 0
-                elif 2 <= neighbors.count(1) <= 3:
-                    new_board[r][c] = 1
-                elif neighbors.count(1) > 3:
-                    new_board[r][c] = 0
-            else:
-                if neighbors.count(1) > 3:
-                    new_board[r][c] = 1
+            new_board[r][c] = update_cell(neighbors, r, c, board)
 
     return new_board
 
 if __name__ == '__main__':
+    '''
+        Usage: 
+        python main.py <filename> to start from a non-random state
+        else: python main.py
+    '''
+    if len(sys.argv) > 1:
+        board = board_from_file(sys.argv[1])
+    else:
+        board = random_state(9, 9)
     pygame.init()
-    board = random_state(9, 9)
     while True:
         render(board)
         time.sleep(3)
