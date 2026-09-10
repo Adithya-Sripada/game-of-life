@@ -1,11 +1,6 @@
 import random
+import pygame
 import time
-
-
-class Colors:
-    DEAD = '\033[31m'
-    ALIVE = '\033[92m'
-    RESET = '\033[0m'
 
 def null_state(width, height):
     return [[0 for x in range(width)] for y in range(height)]
@@ -20,14 +15,37 @@ def random_state(width, height):
     return board
 
 def render(board):
+    pygame.display.init()
+    width = len(board[0])*100
+    height = len(board)*100
+    b = pygame.display.set_mode((width, height))
+    x = 0
+    y = 0
+    for row in board:
+        for col in row:
+            rect = pygame.Rect((x, y), (100, 100))
+            if col:
+                pygame.draw.rect(b, (255, 255 , 255), rect)
+            else:
+                pygame.draw.rect(b, (0, 0, 0), rect)
+            y += 100
+        x += 100
+        y = 0
+
+    pygame.display.update()
+
+def console_render(board):
+    DEAD = '\033[31m'
+    ALIVE = '\033[92m'
+    RESET = '\033[0m'
     for row in board:
         for col in row:
             if col:
-                print(Colors.ALIVE + 'A' + Colors.RESET, end=' ')
+                print(ALIVE + 'A' + RESET, end=' ')
             else:
-                print(Colors.DEAD + 'D' + Colors.RESET,end=' ')
+                print(DEAD + 'D' + RESET,end=' ')
         print('\n')
-    print(Colors.RESET)
+    print(RESET)
 
 def update_cell(neighbors, r, c, board):
     if board[r][c] == 1:
@@ -100,7 +118,8 @@ def next_state(board):
     return new_board
 
 if __name__ == '__main__':
-    board = random_state(7, 7)
+    pygame.init()
+    board = random_state(9, 9)
     while True:
         render(board)
         time.sleep(3)
