@@ -78,7 +78,7 @@ def update_cell(neighbors, r, c, board):
 
 
 def next_edges(board):
-    new_edges = board
+    new_edges = null_state(len(board[0]), len(board))
     for c in range(1, len(board[0])-1):
         r = 0
         neighbors = [board[r][c - 1], board[r][c + 1], board[r+1][c - 1], board[r+1][c], board[r+1][c + 1]]
